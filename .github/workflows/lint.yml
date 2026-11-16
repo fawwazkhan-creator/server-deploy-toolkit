@@ -1,0 +1,40 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: ShellCheck and file modes
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Scripts are committed as executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t not_executable < <(git ls-files --stage -- '*.sh' | awk '$1 != "100755" { print $4 }')
+          if (( ${#not_executable[@]} > 0 )); then
+            for file in "${not_executable[@]}"; do
+              echo "::error file=${file}::not executable, fix with: git update-index --chmod=+x ${file}"
+            done
+            exit 1
+          fi
+          echo "All scripts are executable."
+
+      - name: ShellCheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          shellcheck --version
+          git ls-files -z -- '*.sh' | xargs -0 shellcheck --shell=bash --severity=style
+
+      - name: PM2 config parses
+        run: node --check pm2/ecosystem.config.js
