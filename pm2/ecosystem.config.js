@@ -39,6 +39,8 @@ function positiveInteger(value, fallback) {
 const fileEnv = readEnvFile(envFile);
 const apiWorkers = positiveInteger(fileEnv.API_WORKERS, 2);
 const webInstances = positiveInteger(fileEnv.WEB_INSTANCES, 2);
+const apiApp = fileEnv.API_APP || "app.main:app";
+const apiFactory = fileEnv.API_FACTORY === "1" ? ["--factory"] : [];
 
 const restartPolicy = {
   autorestart: true,
@@ -60,7 +62,8 @@ module.exports = {
       script: path.join(currentDir, "api", ".venv", "bin", "uvicorn"),
       interpreter: "none",
       args: [
-        "app.main:app",
+        apiApp,
+        ...apiFactory,
         "--host", "127.0.0.1",
         "--port", String(API_PORT),
         "--workers", String(apiWorkers),

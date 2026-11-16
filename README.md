@@ -72,7 +72,7 @@ monitor/healthcheck.sh        uptime check with change-only webhook alerts
 ## What the app repository must look like
 
 ```
-api/requirements.txt    FastAPI app importable as app.main:app
+api/requirements.txt    FastAPI app, app.main:app by default (set API_APP, and API_FACTORY=1 for an app factory)
 api/alembic.ini         migrations (or deploy with --skip-migrations)
 web/package-lock.json   Next.js app with an npm "build" script
 ```
